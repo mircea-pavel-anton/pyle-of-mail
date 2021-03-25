@@ -1,5 +1,6 @@
 import email
 from config import filters
+from sys import exit
 
 # Returns an array containing the names of all available mailboxes on the
 # selected imap server
@@ -20,45 +21,69 @@ def get_mailboxes(imap):
     return mailboxes
 
 # Returns the sender of the given message
-def extract_sender(imap, message_number):
-    # Fetch the given message based on the number
-    _, msg = imap.fetch(message_number, '(RFC822)')
+def extract_sender(imap, message_uid):
+    sender = ""
+    
+    try:
+        # Fetch the given message based on the number
+        rc, msg = imap.fetch(message_uid, '(RFC822)')
 
-    # Parse the data bytes
-    mail = email.message_from_bytes(msg[0][1])
+        # If the operation was successful, extract the data
+        if (rc == 'OK'):
+            # Parse the data bytes
+            mail = email.message_from_bytes(msg[0][1])
+            sender = mail["from"]
+        else:
+            log("Failed to fetch mail: " + str(message_uid))
+
+    except:
+        log("Failed to fetch mail: " + str(message_uid))
 
     # Return the sender field
-    return mail["from"]
+    return sender
 
 # Analyzes the emails in the given mailbox.
 # It returns a dictionary containing the address of the sender
 # as the key, and the number of emails received from them as the
 # value.
 def analyze_mailbox(imap, mailbox):
-    # Select the given mailbox as to only analyze it
-    imap.select(mailbox)
-
     # A dictionary that will contain pairs in this format:
     # { "sender_address@provider.whatever": number_of_emails_received_from_them }
-    senders = {}
+    senders_dict = {}
 
-    # Fetch all message numbers in the given mailbox
-    _, message_numbers_raw = imap.search(None, 'ALL')
+    try:
+        # Select the given mailbox as to only analyze it
+        imap.select(mailbox)
 
-    # Loop through all available emails
-    for message_number in message_numbers_raw[0].split():
-        # Extract the email sender
-        sender = extract_sender(imap, message_number)
+        # Fetch all message numbers in the given mailbox
+        rc, data = imap.search(None, 'ALL')
 
-        # If the doesn't exist in the dictionary, add it with a value of 1
-        # Otherwise, increment the associated number
-        if sender not in senders:
-            senders[sender] = 1
+        # If the operation was succesful, analyze the data
+        # otherwise, log an error
+        if (rc == 'OK'):
+            index = 1
+            # Loop through all available emails
+            for message_uid in data[0].split():
+                print(str(index) + "/" + str(len(data[0].split())))
+                # Extract the email sender
+                sender = extract_sender(imap, message_uid)
+
+                # If the doesn't exist in the dictionary, add it with a value of 1
+                # Otherwise, increment the associated number
+                if sender not in senders_dict:
+                    senders_dict[sender] = 1
+                else:
+                    senders_dict[sender] += 1
+                index += 1
         else:
-            senders[sender] += 1
+            log("Failed to fetch all messages in mailbox:" + mailbox)
+    except:
+        log("Failed to fetch all messages in mailbox:" + mailbox)
 
-    imap.close() # Close the opened mailbox
-    return senders
+    finally:
+        imap.close() # Close the opened mailbox
+
+    return senders_dict
 
 # Logger function. Should print to some log file, or stdout or something
 # this is plenty for now, but i should really not forget to change this later :)
@@ -69,6 +94,7 @@ def log(message):
 # the appropriate mailboxes are present for the filtering to take
 # place
 def create_folder_structure(imap):
+    log("Creating mailboxes...")
     # Get a list of all existing mailboxes
     mailboxes = get_mailboxes(imap)
 
@@ -93,11 +119,16 @@ def create_folder_structure(imap):
             # Remove the trailing backslash
             formatted = target[0 : len(target) - 1]
 
-            # Check if target already exists.
-            # If it does not, create it and log it
+            # Check if target already exists. If it does not, create it and log it
             if (formatted not in mailboxes):
-                imap.create(target)
-                mailboxes.append(target)
-                log("Created mailbox: " + target)
+                try:
+                    imap.create(formatted)  # Create mailbox
+                    mailboxes.append(formatted) # Add it to the cached list
+                    log("Created mailbox: " + formatted)
+                except:
+                    log("Failed to create mailbox: " + formatted)
+                    log("That is a critical error. Exiting...")
+                    sys.exit()
             else:
-                log("Mailbox " + target + " already exists")
+                log("Mailbox " + formatted + " already exists")
+    log("Done")
