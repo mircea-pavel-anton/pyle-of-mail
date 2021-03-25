@@ -1,0 +1,10 @@
+# Your credentials for the particular imap server
+username = "your.email.address@provider.whatever"
+password = "your sup3r s3cur3 p@$$w0rd"
+
+# The name of the imap server
+# imap_server = "imap.mail.yahoo.com"       # For yahoo mail
+# imap_server = "imap.gmail.com"            # For Gmail
+# imap_server = "imap-mail.outlook.com"     # For Outlook
+# imap_server = "outlook.office365.com"     # For Office365
+# For more information, check out: https://www.systoolsgroup.com/imap/
