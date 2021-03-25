@@ -58,3 +58,42 @@ def analyze_mailbox(imap, mailbox):
             senders[sender] += 1
 
     return senders
+
+# Logger function. Should print to some log file, or stdout or something
+# this is plenty for now, but i should really not forget to change this later :)
+def log(message):
+    print(message)
+
+# Loop through all the filters defined in the config, and ensure
+# the appropriate mailboxes are present for the filtering to take
+# place
+def create_folder_structure(imap):
+    # Get a list of all existing mailboxes
+    mailboxes = get_mailboxes(imap)
+
+    # For every folder defined in the filters, check if it already exists
+    # and create it if it does not
+    for entry in filters:
+        # Get the folder path from the filter entry
+        folder = filters[entry]
+
+        # The folders defined in the filters contain a full path.
+        # As such, we need to split that path and create all the required
+        # subfolders, otherwise it will create a single folder with slashes
+        # in the name
+        # For example, for the structure "a/b/c", the target directory will
+        # be "a", then "a/b", then "a/b/c" to ensure the proper hierarchy
+        # is created.
+        target = ""
+        for level in folder.split('/'):
+            # Add one level to the path per iteration
+            target += "{}/".format(level)
+            # Check if target already exists.
+            # If it does not, create it and log it
+            if (target not in mailboxes):
+                imap.create(target)
+                mailboxes.append(target)
+                log("Created mailbox: " + target)
+            else:
+                log("Mailbox " + target + " already exists")
+
