@@ -88,12 +88,15 @@ def create_folder_structure(imap):
         for level in folder.split('/'):
             # Add one level to the path per iteration
             target += "{}/".format(level)
+
+            # Remove the trailing backslash
+            formatted = target[0 : len(target) - 1]
+
             # Check if target already exists.
             # If it does not, create it and log it
-            if (target not in mailboxes):
+            if (formatted not in mailboxes):
                 imap.create(target)
                 mailboxes.append(target)
                 log("Created mailbox: " + target)
             else:
                 log("Mailbox " + target + " already exists")
-
