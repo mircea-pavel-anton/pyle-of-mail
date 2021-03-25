@@ -57,6 +57,7 @@ def analyze_mailbox(imap, mailbox):
         else:
             senders[sender] += 1
 
+    imap.close() # Close the opened mailbox
     return senders
 
 # Logger function. Should print to some log file, or stdout or something
