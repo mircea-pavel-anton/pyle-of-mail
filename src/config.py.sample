@@ -1,14 +1,36 @@
-# Log file paths
-oklog = /var/log/pyle-of-mail/ok.log
-errlog = /var/log/pyle-of-mail/error.log
+# Log file path
+logfile = '~/pyle-of-mail/pom.log'
+
+# The mailboxes this script should filter.
+# This should be an array
+# mailboxes = [ 'Inbox' ] # Only filter my inbox
+# mailboxes = [ 'Inbox', 'Archive' ] # Filter my inbox and my archive folders
+
+# The amount of time, in seconds, the script will wait after finishing a filter loop
+# before starting a new one
+# sleep_time = 0 # sleep is for the weak!
+# sleep_time = 300 # 5 min
+# sleep_time = 1800 # 30 min
+# sleep_time = 3600 # 1h
+# sleep_time = 21600 # 6h (4x per day)
+# sleep_time = 43200 # 12h (twice per day)
+# sleep_time = 86400 # 24h (once per day)
+# sleep_time = 604800 # 7 days (weekly)
 
 # Your credentials for the particular imap server
 username = "your.email.address@provider.whatever"
 password = "your sup3r s3cur3 p@$$w0rd"
 
-# The name of the imap server
+# The address of the imap server
 # imap_server = "imap.mail.yahoo.com"       # For yahoo mail
 # imap_server = "imap.gmail.com"            # For Gmail
 # imap_server = "imap-mail.outlook.com"     # For Outlook
 # imap_server = "outlook.office365.com"     # For Office365
 # For more information, check out: https://www.systoolsgroup.com/imap/
+
+# The dictionary of filter rules.
+# The structure of the dict is: { 'address@provider.com': 'dest/mailbox'}
+filters = {
+    # 'account-update@amazon.com': 'Shopping/Amazon',
+    # 'security-noreply@linkedin.com' : 'Services/LinkedIn',
+}
