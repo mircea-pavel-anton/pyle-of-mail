@@ -130,3 +130,9 @@ dmypy.json
 
 # Ignore the prod config
 src/config.py
+
+# Ignore log files
+.log
+
+# Ignore custom VsCode configs
+.vscode/settings.json
