@@ -1,3 +1,7 @@
+# Log file paths
+oklog = /var/log/pyle-of-mail/ok.log
+errlog = /var/log/pyle-of-mail/error.log
+
 # Your credentials for the particular imap server
 username = "your.email.address@provider.whatever"
 password = "your sup3r s3cur3 p@$$w0rd"
