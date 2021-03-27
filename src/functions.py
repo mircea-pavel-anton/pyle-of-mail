@@ -1,8 +1,21 @@
 from imap_tools import A
 from collections import defaultdict
 
-from config import filters, logfile
+from config import filters, logfile, username, password, imap_server
 from datetime import datetime
+
+# Connect to the imap server + logging
+def imap_connect():
+    log('Logging in to ' + imap_server + '...')
+    imap = MailBox(imap_server).login(username, password)
+    log('OK')
+
+# Disconnect from the imap server + logging
+def imap_disconnect(imap):
+    log('Disconnecting from' + imap_server + '...')
+    imap.logout()
+    log('OK')
+
 
 # Append log messages to the log file
 def log(message):
