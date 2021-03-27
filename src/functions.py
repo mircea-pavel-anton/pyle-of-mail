@@ -1,30 +1,35 @@
-from imap_tools import A
-from collections import defaultdict
-
 from config import filters, logfile, username, password, imap_server
+
+from imap_tools import MailBox, A
+from collections import defaultdict
 from datetime import datetime
+
 
 # Connect to the imap server + logging
 def imap_connect():
     log('Logging in to ' + imap_server + '...')
     imap = MailBox(imap_server).login(username, password)
     log('OK')
+    return imap
 
 # Disconnect from the imap server + logging
 def imap_disconnect(imap):
-    log('Disconnecting from' + imap_server + '...')
+    log('Disconnecting from ' + imap_server + '...')
     imap.logout()
     log('OK')
-
 
 # Append log messages to the log file
 def log(message):
     # Get the current time for the message timestamp
     time = datetime.now()
-    timestamp = str(time.day) + '/' + str(time.month) + '/' + str(time.year) + " | " + str(time.hour) + ':' + str(time.minute) + ':' + str(time.second) + '.' + str(time.microsecond)
+
+    # Extract the timestamp from the current time, and make sure it's 30 chars long
+    timestamp = '[ ' + str(time.day) + '/' + str(time.month) + '/' + str(time.year) + " | " + str(time.hour) + ':' + str(time.minute) + ':' + str(time.second) + '.' + str(time.microsecond) + ' ]'
+    while len(timestamp) < 30:
+        timestamp += ' '
 
     # Timestamp the message and add a newline at the end
-    message = f'[{timestamp}]\t{message}\n'
+    message = f'{timestamp}\t{message}\n'
 
     # Open the log file, dump the message inside and then close it
     file = open(logfile, "a")
@@ -50,9 +55,12 @@ def analyze_mailbox(imap, mailbox):
     return senders
 
 # Applies all the filters from the config file on the given mailbox
+# Returns the number of emails that got moved around
 def filter_mailbox(imap, mailbox):
     # Select the required mailbox
     imap.folder.set(mailbox)
+
+    count = 0 # number of emails that got moved around
 
     # Fetch all unseen emails from the given mailbox
     # NOTE: the returned value of ima.fetc() is a generator
@@ -78,12 +86,15 @@ def filter_mailbox(imap, mailbox):
                 log('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
                 log('\tfrom: ' + mail.from_)
                 log('\tsubject: ' + mail.subject)
+                count += 1
 
     # Parse the dictionary for each directory, and move the emails in bulk
     # This should be more efficient thatn moving each email at a time in terms
     # of requests/sec.
     for entry in dict:
         imap.move([m for m in dict[entry]], entry)
+
+    return count
 
 # Parses the filters from the config file and extracts the mailbox structure/hierarchy
 def get_folders():
