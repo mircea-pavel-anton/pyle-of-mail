@@ -1,7 +1,22 @@
-from log import log, log
-from collections import defaultdict
-from config import filters
 from imap_tools import A
+from collections import defaultdict
+
+from config import filters, logfile
+from datetime import datetime
+
+# Append log messages to the log file
+def log(message):
+    # Get the current time for the message timestamp
+    time = datetime.now()
+    timestamp = dateTimeObj.year + '/', dateTimeObj.month, '/', dateTimeObj.day, dateTimeObj.hour, ':', dateTimeObj.minute, ':', dateTimeObj.second, '.', dateTimeObj.microsecond
+
+    # Timestamp the message and add a newline at the end
+    message = f'[{timestamp}] {message}\n'
+
+    # Open the log file, dump the message inside and then close it
+    file = open(logfile, "a")
+    file.write(message)
+    file.close()
 
 def analyze_mailbox(imap, mailbox):
     imap.folder.set(mailbox)
@@ -29,7 +44,6 @@ def filter_mailbox(imap, mailbox):
             log('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
             log('\tfrom: ' + mail.from_)
             log('\tsubject: ' + mail.subject)
-
 
 def get_folders():
     list = []
