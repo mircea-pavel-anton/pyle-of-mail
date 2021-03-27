@@ -1,21 +1,16 @@
-# Append log messages to the success log file
-def logok(message):
-    file = open(oklog, "a")
+from config import logfile
+from datetime import datetime
+
+# Append log messages to the log file
+def log(message):
+    # Get the current time for the message timestamp
+    time = datetime.now()
+    timestamp = dateTimeObj.year + '/', dateTimeObj.month, '/', dateTimeObj.day, dateTimeObj.hour, ':', dateTimeObj.minute, ':', dateTimeObj.second, '.', dateTimeObj.microsecond
+
+    # Timestamp the message and add a newline at the end
+    message = f'[{timestamp}] {message}\n'
+
+    # Open the log file, dump the message inside and then close it
+    file = open(logfile, "a")
     file.write(message)
     file.close()
-
-# Append log messages to the errlog files
-# Default behaviour is to log the message and continue the
-# execution of the program.
-# One can force exit the script by passing `exit=True`
-def logerr(message, exit = False):
-    file = open(errlog, "a")
-    file.write(message)
-    
-    if (exit):
-        file.write('This is a critical failure. Exiting...')
-        file.close()
-        exit()
-    else:
-        file.close()
-
