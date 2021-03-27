@@ -1,15 +1,16 @@
-import imaplib
 from config import imap_server, username, password
-from functions import get_mailboxes, analyze_mailbox
+from functions import analyze_mailbox, filter_mailbox
+from imap_tools import MailBox
+from time import sleep
 
 # Connect to the imap server
-imap = imaplib.IMAP4_SSL(imap_server)
-imap.login(username, password)
+imap = MailBox(imap_server).login(username, password)
 
-mailboxes = get_mailboxes(imap)
-print(mailboxes)
-result = analyze_mailbox(imap, "Inbox")
-print(result)
+# Filtering is done here...
+while True:
+    for mailbox in mailboxes:
+        filter_mailbox(imap, mailbox)
+    sleep(sleep_time)
 
 # Disconnect from the imap server
 imap.logout()
