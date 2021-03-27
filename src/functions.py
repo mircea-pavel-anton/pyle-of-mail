@@ -32,7 +32,7 @@ def log(message):
     message = f'{timestamp}\t{message}\n'
 
     # Open the log file, dump the message inside and then close it
-    file = open(logfile, "a")
+    file = open(logfile, "a+")
     file.write(message)
     file.close()
 
