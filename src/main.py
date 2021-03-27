@@ -1,8 +1,6 @@
+from time import sleep
 from config import mailboxes, sleep_time
 from functions import filter_mailbox, log, create_folders, imap_connect, imap_disconnect
-
-from imap_tools import MailBox
-from time import sleep
 
 
 # Connect to the imap server, ensure the needed
@@ -19,7 +17,8 @@ while True:
     # Loop through all the required mailboxes and filter them
     for mailbox in mailboxes:
         log('Filtering started on ' + mailbox)
-        filter_mailbox(imap, mailbox)
+        if filter_mailbox(imap, mailbox) == 0:
+            log('There was nothing to do.')
 
     # Disconnect from the imap server
     imap_disconnect(imap)
