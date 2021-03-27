@@ -1,4 +1,4 @@
-from log import logok, logerr
+from log import log, log
 from collections import defaultdict
 from config import filters
 from imap_tools import A
@@ -26,9 +26,9 @@ def filter_mailbox(imap, mailbox):
         imap.move(mails, filters[rule])
 
         for mail in mails:
-            logok('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
-            logok('\tfrom: ' + mail.from_)
-            logok('\tsubject: ' + mail.subject)
+            log('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
+            log('\tfrom: ' + mail.from_)
+            log('\tsubject: ' + mail.subject)
 
 
 def get_folders():
@@ -63,14 +63,14 @@ def create_folders(imap):
 
     # For each required folder, check if it already exists or not,
     # and create it if required.
-    logok('Creating mailboxes...')
+    log('Creating mailboxes...')
     for folder in folders:
         if imap.folder.exists(folder):
-            logok('\t- Mailbox already exists: ' + folder)
+            log('\t- Mailbox already exists: ' + folder)
         else:
             try:
                 mailbox.folder.create(folder)
-                logok('\t- Successfully created mailbox: ' + folder)
+                log('\t- Successfully created mailbox: ' + folder)
             except:
-                logerr('Failed to create mailbox: ' + folder, True)
-    logok('Done')
+                log('Failed to create mailbox: ' + folder)
+    log('Done')
