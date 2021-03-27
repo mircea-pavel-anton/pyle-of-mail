@@ -1,6 +1,7 @@
 from log import logok, logerr
 from collections import defaultdict
 from config import filters
+from imap_tools import A
 
 def analyze_mailbox(imap, mailbox):
     imap.folder.set(mailbox)
@@ -20,22 +21,15 @@ def filter_mailbox(imap, mailbox):
     # Select the required mailbox
     imap.folder.set(mailbox)
 
-    # For each email, check if any filter applies, and if so,
-    # move it to the appropriate folder
-    mails = imap.fetch()
-    for mail in mails:
-        sender = mail.from_
+    for rule in filters:
+        mails = imap.fetch(A(from_=rule))
+        imap.move(mails, filters[rule])
 
-        moved = False
+        for mail in mails:
+            logok('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
+            logok('\tfrom: ' + mail.from_)
+            logok('\tsubject: ' + mail.subject)
 
-        for rule in filters:
-            if (rule.upper() in sender.upper()):
-                logok('Moving email from ' + sender + ' to ' + filters[rule])
-                imap.move(mail.uid, filters[rule])
-                moved = True
-
-        if not moved:
-            logok('Mail from ' + sender + ' did not pass any filters. Not moving.')
 
 def get_folders():
     list = []
