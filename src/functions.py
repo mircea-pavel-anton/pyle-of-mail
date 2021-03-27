@@ -8,16 +8,20 @@ from datetime import datetime
 def log(message):
     # Get the current time for the message timestamp
     time = datetime.now()
-    timestamp = dateTimeObj.year + '/', dateTimeObj.month, '/', dateTimeObj.day, dateTimeObj.hour, ':', dateTimeObj.minute, ':', dateTimeObj.second, '.', dateTimeObj.microsecond
+    timestamp = str(time.day) + '/' + str(time.month) + '/' + str(time.year) + " | " + str(time.hour) + ':' + str(time.minute) + ':' + str(time.second) + '.' + str(time.microsecond)
 
     # Timestamp the message and add a newline at the end
-    message = f'[{timestamp}] {message}\n'
+    message = f'[{timestamp}]\t{message}\n'
 
     # Open the log file, dump the message inside and then close it
     file = open(logfile, "a")
     file.write(message)
     file.close()
 
+# Analyzes the given mailbox.
+# It goes through all emails inside a mailbox and returns a dictionary
+# that holds each unique email address as the key, and the number of emails
+# received from them as the value
 def analyze_mailbox(imap, mailbox):
     imap.folder.set(mailbox)
 
@@ -32,19 +36,43 @@ def analyze_mailbox(imap, mailbox):
     # Return the dictionary
     return senders
 
+# Applies all the filters from the config file on the given mailbox
 def filter_mailbox(imap, mailbox):
     # Select the required mailbox
     imap.folder.set(mailbox)
 
-    for rule in filters:
-        mails = imap.fetch(A(from_=rule))
-        imap.move(mails, filters[rule])
+    # Fetch all unseen emails from the given mailbox
+    # NOTE: the returned value of ima.fetc() is a generator
+    # we want to convert it to a list, so that we can loop
+    # through it multiple times.
+    mails_list = list(imap.fetch(A(seen=True)))
 
-        for mail in mails:
-            log('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
-            log('\tfrom: ' + mail.from_)
-            log('\tsubject: ' + mail.subject)
+    # This dictionary acts as a 'to do list', in the sense that
+    # it stores what emails should be moved and where.
+    # The structure of the dictionary is as follows:
+    # - the value element holds a list of email UIDs
+    # - the key element stores the name of the mailbox in which
+    #     the emails from the value should be moved
+    dict = defaultdict(lambda: [])
 
+    # For each retrieved mail, check it against each rule in the filters
+    for mail in mails_list:
+        for rule in filters:
+            # Convert both strings to upper, since we do not want the filters to
+            # be case-sensitive
+            if rule.upper() in mail.from_.upper():
+                dict[filters[rule]].append(mail.uid)
+                log('Moving from ' + mailbox + ' to ' + filters[rule] + ' mail')
+                log('\tfrom: ' + mail.from_)
+                log('\tsubject: ' + mail.subject)
+
+    # Parse the dictionary for each directory, and move the emails in bulk
+    # This should be more efficient thatn moving each email at a time in terms
+    # of requests/sec.
+    for entry in dict:
+        imap.move([m for m in dict[entry]], entry)
+
+# Parses the filters from the config file and extracts the mailbox structure/hierarchy
 def get_folders():
     list = []
 
@@ -71,6 +99,7 @@ def get_folders():
 
     return list
 
+# Creates the required mailbox hierarchy based on the filters listed in the config file
 def create_folders(imap):
     # Get a list of all the mailboxes required for the filter rules
     folders = get_folders()
@@ -83,7 +112,7 @@ def create_folders(imap):
             log('\t- Mailbox already exists: ' + folder)
         else:
             try:
-                mailbox.folder.create(folder)
+                imap.folder.create(folder)
                 log('\t- Successfully created mailbox: ' + folder)
             except:
                 log('Failed to create mailbox: ' + folder)
