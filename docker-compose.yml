@@ -1,0 +1,9 @@
+---
+version: '3'
+
+services:
+  app:
+    build: .
+    volumes:
+      - "./config.py:/src/config.py"
+      - "./pyle-of-mail.log:/var/log/pyle-of-mail.log"
