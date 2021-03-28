@@ -1,10 +1,21 @@
+# The output of python3 --version from the dev machine: Python 3.8.5
 FROM python:3.8-buster
 
-RUN mkdir -p /home/pom
+# Create the dir that will hold the source files
+RUN mkdir /src
 
-COPY src/* /home/pom/
-COPY requirements.txt /tmp/requirements.txt
+# Set the newly created dir as the workdir
+WORKDIR /src
 
-RUN pip3 install -r /tmp/requirements.txt
+# Copy over the essential files:
+#  - main.py & functions.py to be able to run our code
+#  - requirements.txt to be able to prepare the environment
+# We do not need the config.py file, as that will be bind
+# mounted
+COPY src/main.py .
+COPY src/functions.py .
+COPY requirements.txt .
 
-CMD ["python3", "/home/pom/main.py"]
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD python3 -u /src/main.py
