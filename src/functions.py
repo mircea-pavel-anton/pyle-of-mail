@@ -35,6 +35,7 @@ def log(message):
     file = open(logfile, "a+")
     file.write(message)
     file.close()
+    print(message)
 
 # Analyzes the given mailbox.
 # It goes through all emails inside a mailbox and returns a dictionary
