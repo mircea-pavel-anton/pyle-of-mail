@@ -3,7 +3,7 @@ version: '3'
 
 services:
   app:
-    build: .
+    image: mikeanth/pyle-of-mail:1.0
     volumes:
-      - "./config.py:/src/config.py"
+      - "./src/config.py:/src/config.py"
       - "./pyle-of-mail.log:/var/log/pyle-of-mail.log"
