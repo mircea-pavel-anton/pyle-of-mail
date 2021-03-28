@@ -11,3 +11,6 @@ venv:
 
 install:
 	pip install -r requirements.txt
+
+build:
+	docker build -t pyle-of-mail .
