@@ -1,5 +1,5 @@
 # Log file path
-logfile = '/var/log/pyle-of-mail/pom.log'
+logfile = '/var/log/pyle-of-mail.log'
 
 # The mailboxes this script should filter.
 # This should be an array
