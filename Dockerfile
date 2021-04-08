@@ -1,5 +1,5 @@
 # The output of python3 --version from the dev machine: Python 3.8.5
-FROM python:3.8-buster
+FROM python:3.8-slim-buster
 
 # Create the dir that will hold the source files
 RUN mkdir /src
